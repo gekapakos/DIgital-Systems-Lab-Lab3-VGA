@@ -1,0 +1,73 @@
+`timescale 1ns/1ps
+
+module VRAM_testbench;
+
+reg clk, reset;
+reg [13:0] vga_addr;
+wire VGA_RED, VGA_GREEN, VGA_BLUE; 
+
+VRAM VRAM_u(.clk(clk), .reset(reset), .vga_addr(vga_addr), .VGA_RED(VGA_RED), .VGA_GREEN(VGA_GREEN), .VGA_BLUE(VGA_BLUE));
+
+initial begin
+	clk = 0;
+	forever #5 clk = ~clk;
+end
+/*
+initial begin
+	reset = 1'b1;
+	vga_addr = 0;
+	#100 reset = 1'b0;
+	#100 vga_addr = 0;
+	#100 vga_addr = 127;
+	#100 vga_addr = 255;
+	#100 vga_addr = 382;
+	#100 vga_addr = 509;
+	#100 vga_addr = 636;
+	#100 vga_addr = 763;
+	#100 vga_addr = 890;
+	#100 vga_addr = 1017;
+	#100 vga_addr = 1144;
+	#100 vga_addr = 1271;
+	#100 vga_addr = 1398;
+	#100 vga_addr = 1525;
+	#100 vga_addr = 1652;
+	#100 vga_addr = 1779;
+	#100 vga_addr = 1906;
+	#100 vga_addr = 2033;
+	#100 vga_addr = 2160;
+	#100 vga_addr = 2287;
+	#100 vga_addr = 2414;
+	#100 vga_addr = 2541;
+	#100 vga_addr = 2668;
+	#100 vga_addr = 2795;
+	#100 vga_addr = 2922;
+	#100 vga_addr = 3049;
+	#100 vga_addr = 3176;
+	#100 vga_addr = 3303;
+	#100 vga_addr = 3430;
+	#100 vga_addr = 3557;
+	#100 vga_addr = 3684;
+	#100 vga_addr = 3811;
+	#100 vga_addr = 3938;
+	#100 vga_addr = 4065;
+	#100 vga_addr = 4192;
+	#100 vga_addr = 4319;
+	#100 vga_addr = 4446;
+	#100 vga_addr = 4573;
+	#100 vga_addr = 4700;
+	#100 vga_addr = 4827;
+	#100 vga_addr = 4954;
+	#100 vga_addr = 5081;
+end*/
+
+initial begin
+	reset = 1'b1;
+	#105 reset = 1'b0;
+end
+
+initial begin
+	#100 vga_addr = 0;
+	forever #100 vga_addr = vga_addr + 1;
+end
+
+endmodule

@@ -1,0 +1,103 @@
+`timescale 1ns/1ps
+
+module Hcounter(clk, reset, VGA_HSYNC, HPIXEL, hcount, HRGB_EN);
+
+input clk, reset;
+output reg VGA_HSYNC;
+output [6:0] HPIXEL;
+output reg [9:0] hcount;
+output reg HRGB_EN;
+
+reg [2:0] state, next_state;
+reg [9:0] hcount_next;
+reg [6:0] hcount_ins, hcount_ins_next;
+reg [2:0] flag, flag_next;
+
+parameter 	stateA = 0,
+			stateB = 1,
+			stateC = 2,
+			stateD = 3,
+			stateE = 4;
+
+always@ (posedge clk or posedge reset) begin
+	if(reset) begin
+		state <= stateA;
+		hcount <= 0;
+		hcount_ins <= 0;
+		flag <= 0;
+	end
+	else begin
+		state <= next_state;
+		hcount <= hcount_next;
+		hcount_ins <= hcount_ins_next;
+		flag <= flag_next;
+	end
+end
+
+always@(state or hcount or hcount_ins or flag) begin
+	next_state = state;
+	hcount_next = hcount;
+	hcount_ins_next = hcount_ins;
+	flag_next = flag;
+	VGA_HSYNC = 0;
+	HRGB_EN = 0;
+	case(state)
+		stateA: begin
+			HRGB_EN = 0;
+			VGA_HSYNC = 1'b1;
+			hcount_next = 0;
+			next_state = stateB;
+		end
+		stateB: begin
+			HRGB_EN = 0;
+			flag_next = 0;
+			VGA_HSYNC = 1'b0;
+			hcount_ins_next = 0;
+			if(hcount == (95))
+				next_state = stateC;
+			else
+				hcount_next = hcount_next + 1;
+		end
+		stateC: begin
+			flag_next = 0;
+			HRGB_EN = 0;
+			VGA_HSYNC = 1'b1;
+			hcount_ins_next = 0;
+			if(hcount < (142))
+				hcount_next = hcount_next + 1;
+			else
+				next_state = stateD;
+		end
+		stateD: begin
+			VGA_HSYNC = 1'b1;
+			HRGB_EN = 1;
+			if(hcount < (781)) begin
+				hcount_next = hcount_next + 1;
+				flag_next = flag_next + 1;
+				if(flag == 4) begin
+					hcount_ins_next = hcount_ins_next + 1;
+					flag_next = 0;
+				end
+			end
+			else
+				next_state = stateE;
+		end
+		stateE: begin
+			flag_next = 0;
+			HRGB_EN = 0;
+			VGA_HSYNC = 1'b1;
+			hcount_ins_next = 127;
+			if(hcount < (795))//796 -1 period bc we add it up front
+				hcount_next = hcount_next + 1;
+			else begin
+				next_state = stateA;
+				hcount_next = 0;
+				hcount_ins_next = 0	;
+			end
+		end
+	endcase
+end
+
+assign HPIXEL = hcount_ins;
+
+endmodule
